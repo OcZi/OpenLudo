@@ -205,10 +205,12 @@ def turn_game(players: dict[str, int], turn_for: int) -> str:
         pause()
     return winner
 
-def switch_turn(turn : int):
+
+def switch_turn(turn: int):
     if turn == 0:
         return 1
     return 0
+
 
 def record():
     print(" ")
