@@ -1,4 +1,4 @@
-import os
+from screen_utils import *
 import random
 
 
@@ -7,20 +7,6 @@ def int_input():
     while len(arg_input) == 0 or not arg_input.isnumeric():
         arg_input = input("   :")
     return int(arg_input) - 1
-
-
-def pause():
-    print("")
-    input("Presiona ENTER para continuar.")
-    clear()
-
-
-def clear():
-    if os.name == "posix":
-        command = "clear"
-    else:
-        command = "cls"
-    os.system(command)
 
 
 dado_moves = ["fuerte", "normal", "debil"]
