@@ -65,8 +65,8 @@ def random_move(move_type: int) -> int:
 
 def welcome():
     print("   -  LUDO  -")
-    # Imprime todas las opciones menos welcome (opción oculta)
-    length = len(options) - 1
+    # Imprime todas las opciones
+    length = len(options)
     for i in range(length):
         function_option = options[i]
         print(f"   {i + 1}. {function_option.__name__.capitalize()}")
@@ -217,7 +217,7 @@ def end():
     exit(0)
 
 
-options = [start, record, end, welcome]
+options = [start, record, end]
 records = ["Julio Yarasca"]
 
 # TODO: EMPIEZA AQUI!!!
