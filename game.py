@@ -1,17 +1,7 @@
+import database
 from screen_utils import *
+from game_utils import *
 import random
-
-
-def int_input():
-    arg_input = ""
-    while len(arg_input) == 0 or not arg_input.isnumeric():
-        arg_input = input("   :")
-    return int(arg_input) - 1
-
-
-dado_moves = ["fuerte", "normal", "debil"]
-bonuses = [14, 8]
-meta = 20
 
 
 def show_table(players: dict[str, int]):
@@ -47,10 +37,7 @@ def selected_random_move() -> int:
             print(f"   {i + 1}. {move}")
         print("")
 
-        num = int_input()
-        if num < 0 or num > 2:
-            continue
-
+        num = input_option(2, True)
         return random_move(num)
 
 
@@ -74,18 +61,13 @@ def welcome():
 
 
 def start():
-    cpu = False
     while True:
         print("")
         print("   -   Tipo de juego   -")
         print("   1. PvP")
         print("   2. CPU")
         print("")
-        option = int_input()  # input - 1
-        if option < 0 or option > 1:
-            continue
-
-        cpu = option == 1
+        cpu = input_option(2) == 2
         break
     print("")
 
@@ -124,10 +106,7 @@ def start():
             turn_for = switch_turn(turn_for)
 
     if winner != "CPU":
-        records.append(winner)
-        size = len(records)
-        if size > 10:
-            records.pop(size - 1)
+        database.update_user()
 
     print(f"{winner} Winner!")
     pause()
@@ -193,15 +172,13 @@ def turn_game(players: dict[str, int], turn_for: int) -> str:
 
 
 def switch_turn(turn: int):
-    if turn == 0:
-        return 1
-    return 0
+    return (turn + 1) % 2
 
 
 def record():
     print(" ")
     print("Records:")
-    size = len(records)
+    size = len(database.database)
     for count in range(10):
         if size == 0 or count > size - 1:
             player = "*"
@@ -213,23 +190,31 @@ def record():
     print(" ")
 
 
+def info():
+    while not database.is_valid_email(email := input("email: ")):
+        continue
+    while not database.is_valid_date(date := input("date: ")):
+        continue
+    while len(name := input("name: ")) == 0:
+        continue
+
+    database.set_user(email, name, date)
+
+
 def end():
+    database.save()
     exit(0)
 
 
-options = [start, record, end]
-records = ["Julio Yarasca"]
+options = [start, record, end, info]
 
 # TODO: EMPIEZA AQUI!!!
 # Bucle del programa para mantenerlo vivo
+database.load()
 while True:
     welcome()
-    selected = int_input()
+    selected = input_option(len(options), True)
 
-    option_size = len(options) - 1
-    if selected < 0 or selected > option_size:
-        continue
-
-    function = options[selected]
-    function()
+    option = options[selected]
+    option()
     print()
