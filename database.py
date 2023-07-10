@@ -7,7 +7,7 @@ database: dict = {}
 user: tuple = ()
 
 email_regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
-date_regex = re.compile(r'^\d((0[1-9]|1[0-2])/{4})$')
+date_regex = re.compile(r'^(0?[1-9]|1[012])[/\-]\d{4}$')
 
 
 def load():

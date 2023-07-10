@@ -61,6 +61,11 @@ def welcome():
 
 
 def start():
+    if database.user == ():
+        clear()
+        info()
+        clear()
+
     while True:
         print("")
         print("   -   Tipo de juego   -")
@@ -179,6 +184,7 @@ def record():
     print(" ")
     print("Records:")
     size = len(database.database)
+
     for count in range(10):
         if size == 0 or count > size - 1:
             player = "*"
@@ -191,11 +197,11 @@ def record():
 
 
 def info():
-    while not database.is_valid_email(email := input("email: ")):
+    while len(name := input("Nombre: ")) == 0:
         continue
-    while not database.is_valid_date(date := input("date: ")):
+    while not database.is_valid_email(email := input("Correo electrónico: ")):
         continue
-    while len(name := input("name: ")) == 0:
+    while not database.is_valid_date(date := input("Fecha: ")):
         continue
 
     database.set_user(email, name, date)
@@ -216,5 +222,7 @@ while True:
     selected = input_option(len(options), True)
 
     option = options[selected]
+    clear()
     option()
     print()
+    clear()
