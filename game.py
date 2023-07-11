@@ -126,7 +126,7 @@ def start():
     if winner != "CPU":
         # Siempre será el primer jugador ahora
         database.update_user_wins()
-        database.update_user_moves(movements[-5:])
+        database.update_user_moves(movements)
         database.update_user()
 
     screen_spaces()
@@ -245,7 +245,7 @@ def ganadores_mensuales():
 
 def to_timestamp(date: str):
     split = date.split("/")
-    mm = split[1]
+    mm = split[0]
     return datetime(2000, int(mm), 1).timestamp()
 
 
