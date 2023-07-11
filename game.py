@@ -251,7 +251,6 @@ def to_timestamp(date: str):
     return datetime(2000, int(mm), 1).timestamp()
 
 
-
 def register():
     screen_spaces()
     gprint(" - Registrate - ")
