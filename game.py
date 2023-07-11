@@ -1,13 +1,10 @@
+import random
 from datetime import datetime
 
 import database
 import pdf
-
-from screen_utils import *
 from game_utils import *
-import random
-from colored import Fore, Back
-
+from screen_utils import *
 from term_utils import title
 
 
