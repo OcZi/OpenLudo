@@ -56,7 +56,7 @@ def set_date(email: str, date: str):
 
 def set_user(email: str, name: str, date: str):
     global user
-    user = (email, name, date, 0, [])
+    user = [email, name, date, 0, []]
 
 
 def delete(email: str):

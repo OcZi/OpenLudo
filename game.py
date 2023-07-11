@@ -130,7 +130,8 @@ def start():
         database.update_user()
 
     screen_spaces()
-    gprint_art(f"{winner} Winner!")
+    gprint_art(f"{winner}")
+    gprint_art("Winner!")
     pause()
 
 
