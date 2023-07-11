@@ -9,6 +9,7 @@ loop = asyncio.get_event_loop()
 frame_buffer = {}
 fps_delay = 0.02
 
+cursor_hidden = False
 
 def title(text: str):
     os.system(f"Title {text}")
@@ -70,15 +71,21 @@ def run_async(func):
 
 
 def init():
-    cursor.hide()
+    switch_cursor()
+
+
+def switch_cursor():
+    global cursor_hidden
+    if not cursor_hidden:
+        cursor_hidden = True
+        cursor.hide()
+    else:
+        cursor_hidden = False
+        cursor.show()
 
 
 def close():
     loop.close()
-    cursor.show()
-
-
-title("LUDO DIVERTIDO")
-init()
-run_async(printing())
-close()
+    global cursor_hidden
+    cursor_hidden = True
+    switch_cursor()

@@ -30,8 +30,20 @@ def get_date(email: str):
     return database[email][1]
 
 
-def set(email: str, name: str, date: str):
-    database[email] = [name, date]
+def get_wins(email: str):
+    return database[email][2]
+
+
+def get_movements(email: str):
+    return database[email][3]
+
+
+def get_user(email: str):
+    return database.get(email)
+
+
+def create(email: str, name: str, date: str, wins: int, movements: list[int]):
+    database[email] = [name, date, wins, movements]
 
 
 def set_name(email: str, name: str):
@@ -44,7 +56,7 @@ def set_date(email: str, date: str):
 
 def set_user(email: str, name: str, date: str):
     global user
-    user = (email, name, date)
+    user = (email, name, date, 0, [])
 
 
 def delete(email: str):
@@ -52,7 +64,17 @@ def delete(email: str):
 
 
 def update_user():
-    set(user[0], user[1], user[2])
+    create(user[0], user[1], user[2], user[3], user[4])
+
+
+def update_user_wins():
+    global user
+    user[3] += 1
+
+
+def update_user_moves(moves: list):
+    global user
+    user[4] = list
 
 
 def is_valid_email(text):
@@ -61,4 +83,3 @@ def is_valid_email(text):
 
 def is_valid_date(text):
     return date_regex.fullmatch(text)
-

@@ -1,11 +1,19 @@
 import database
+import pdf
+
 from screen_utils import *
 from game_utils import *
 import random
+from colored import Fore, Back
+
+from term_utils import title
 
 
 def show_table(players: dict[str, int]):
-    print("- Ludo Divertido -")
+    clear()
+    screen_spaces()
+    gprint("- Ludo Divertido -")
+    lines = []
     for i in range(20, -1, -1):  # Tabla del 1 al 20
         if i == 0:
             line = f"  INICIO. "
@@ -26,18 +34,23 @@ def show_table(players: dict[str, int]):
             line += "(BONUS) "
         if i == 20:
             line += "(META) "
-        print(line)
-    print("-------------------")
+        lines.append(line)
+    gprint_list(lines, lambda index, text: text)
+    gprint("-------------------")
 
 
 def selected_random_move() -> int:
     while True:
-        print("- Movimientos -")
-        for i, move in enumerate(dado_moves):
-            print(f"   {i + 1}. {move}")
-        print("")
+        gprint("- Movimientos -")
+        moves = dado_moves[:]
+        moves.append("Rendirse [!]")
+        gprint_list(moves)
 
-        num = input_option(2, True)
+        num = input_option(3, True)
+
+        # Rendirse !?
+        if num == 3:
+            return -1
         return random_move(num)
 
 
@@ -51,36 +64,36 @@ def random_move(move_type: int) -> int:
 
 
 def welcome():
-    print("   -  LUDO  -")
+    screen_spaces()
+    gprint_art(" -  LUDO  -")
+    gprint()
     # Imprime todas las opciones
-    length = len(options)
-    for i in range(length):
-        function_option = options[i]
-        print(f"   {i + 1}. {function_option.__name__.capitalize()}")
-    print(" ")
+
+    gprint_list(options,
+                lambda i, func_option: f"{i + 1}. {func_option.__name__.capitalize()}")
+    gprint(" ")
 
 
 def start():
     if database.user == ():
         clear()
-        info()
+        register()
         clear()
 
+    """
     while True:
-        print("")
-        print("   -   Tipo de juego   -")
-        print("   1. PvP")
-        print("   2. CPU")
-        print("")
+        gprint("")
+        gprint("   -   Tipo de juego   -")
+        gprint_list(["PvP", "CPU"])
+        gprint("")
         cpu = input_option(2) == 2
         break
-    print("")
+    gprint("")
+    """
 
-    player_name1 = input("Player 1: ")
-    if cpu:
-        player_name2 = "CPU"
-    else:
-        player_name2 = input("Player 2: ")
+    screen_spaces()
+    player_name1 = database.user[1]
+    player_name2 = "CPU"
 
     players = {
         # Orden de entrada:
@@ -89,19 +102,20 @@ def start():
         player_name2: 0
     }
 
+    movements = []
     count_turns = 1
     # 0 = turn for player 1
     # 1 = turn for player 2
     turn_for = 0
     while True:
-        print("")
+        gprint("")
         show_table(players)
-        print("")
-        print(f"Turno {count_turns}:")
+        gprint("")
+        gprint(f"Turno {count_turns}:")
         count_turns += 1
         pause()
 
-        winner = turn_game(players, turn_for)
+        winner = turn_game(players, turn_for, movements)
 
         if winner is not None:
             pause()
@@ -111,20 +125,24 @@ def start():
             turn_for = switch_turn(turn_for)
 
     if winner != "CPU":
+        # Siempre será el primer jugador ahora
+        database.update_user_wins()
+        database.update_user_moves(movements[-5:])
         database.update_user()
 
-    print(f"{winner} Winner!")
+    screen_spaces()
+    gprint_art(f"{winner} Winner!")
     pause()
 
 
-def turn_game(players: dict[str, int], turn_for: int) -> str:
+def turn_game(players: dict[str, int], turn_for: int, movements: list) -> str:
     # Literal python necesita convertir los valores y llaves a list
     # para poder acceder a ellos por index
     list_players = list(players.keys())
     player = list_players[turn_for]
 
-    print("")
-    print(f"Turno de {player}:")
+    gprint("")
+    gprint(f"Turno de {player}:")
 
     moves = 6
     bonus = False
@@ -132,16 +150,22 @@ def turn_game(players: dict[str, int], turn_for: int) -> str:
     winner = None
     while moves == 6 or bonus:
         bonus = False
-        print("")
+        gprint("")
         if player == "CPU":
             moves = random_move(random.randint(0, len(dado_moves) - 1))
         else:
             moves = selected_random_move()
 
-        print("")
+        if moves == -1:
+            winner = list_players[switch_turn(turn_for)]
+            surrender()
+            break
+
+        gprint("")
         show_table(players)
-        print("")
-        print(f"{player} obtuvo el valor de {moves}!")
+        gprint("")
+        gprint(f"{player} obtuvo el valor de {moves}!")
+        movements.append(moves)
 
         players[player] += moves
         if players[player] == meta:
@@ -164,14 +188,14 @@ def turn_game(players: dict[str, int], turn_for: int) -> str:
         # Me olvide de esto pipipi
         player2 = list_players[switch_turn(turn_for)]
         if players[player] == players[player2]:
-            print(f"{player} ha devuelto a {player2} al inicio!")
+            gprint(f"{player} ha devuelto a {player2} al inicio!")
             players[player2] = 0
 
         if players[player] in bonuses:
             bonus = True
-            print(f"CASILLA BONUS EN {players[player]}!")
+            gprint(f"CASILLA BONUS EN {players[player]}!")
         if moves == 6:
-            print("No pierde turno!")
+            gprint("No pierde turno!")
         pause()
     return winner
 
@@ -180,35 +204,96 @@ def switch_turn(turn: int):
     return (turn + 1) % 2
 
 
+def surrender():
+    clear()
+    screen_spaces()
+    gprint("Se ha rendido!")
+    gprint()
+    message = surrender_messages[random.randint(0, len(surrender_messages) - 1)]
+    gprint(message)
+
+
 def record():
-    print(" ")
-    print("Records:")
-    size = len(database.database)
+    screen_spaces()
+    gprint("- Records -")
+    gprint_list(["Top ganadores", "Ganadores (mensuales)"])
+    num = input_option(1)
 
-    for count in range(10):
-        if size == 0 or count > size - 1:
-            player = "*"
-        else:
-            player = records[count]
 
-        print(f"- {player}")
-    pause()
-    print(" ")
+def top_ganadores():
+    for email, data in database.database.items():
+        print()
+
+
+def register():
+    screen_spaces()
+    gprint(" - Registrate - ")
+    term_utils.switch_cursor()
+    while len(name := ginput("Nombre: ")) == 0:
+        continue
+    while not database.is_valid_email(email := ginput("Correo electrónico: ")):
+        continue
+    while not database.is_valid_date(date := ginput("Fecha: ")):
+        continue
+
+    term_utils.switch_cursor()
+    database.set_user(email, name, date)
 
 
 def info():
-    while len(name := input("Nombre: ")) == 0:
-        continue
-    while not database.is_valid_email(email := input("Correo electrónico: ")):
-        continue
-    while not database.is_valid_date(date := input("Fecha: ")):
+    screen_spaces()
+    gprint("- Búsqueda de jugadores -")
+    gprint_list(["Buscar un jugador", "Regresar"])
+
+    num = input_option(1)
+    if num != 1:
+        return
+
+    clear()
+    screen_spaces()
+    gprint("- Datos -")
+    while not database.is_valid_email(email := ginput("Correo del jugador: ")):
         continue
 
-    database.set_user(email, name, date)
+    if (user := database.get_user(email)) is None:
+        gprint("No se ha encontrado al usuario con dicho correo!")
+        pause()
+        info()
+        return
+
+    clear()
+    screen_spaces()
+    gprint(f"- Información de {email} - ")
+    gprint_list(user, text_for_data)
+    gprint()
+    convert_pdf = ginput("Convertir a pdf? :").lower()
+    if convert_pdf in ["si", "true"]:
+        lines = []
+        for i in range(len(user)):
+            lines.append(text_for_data(i, user[i]))
+        pdf.lines_to_pdf(lines, email.replace(".", "_") + ".pdf")
+    pause()
+
+
+def text_for_data(i, data):
+    if i == 0:
+        return f"Nombre: {data}"
+    elif i == 1:
+        return f"Fecha: {data}"
+    elif i == 2:
+        return f"Victorias: {data}"
+    elif i == 3:
+        line = ""
+        for move in data:
+            if len(line) > 0:
+                line += "-"
+            line += str(move)
+        return f"Movimientos: {line}"
 
 
 def end():
     database.save()
+    term_utils.close()
     exit(0)
 
 
@@ -216,13 +301,19 @@ options = [start, record, end, info]
 
 # TODO: EMPIEZA AQUI!!!
 # Bucle del programa para mantenerlo vivo
+
+title("LUDO DIVERTIDO")
+
 database.load()
+term_utils.init()
+
 while True:
+    clear()
     welcome()
     selected = input_option(len(options), True)
 
     option = options[selected]
     clear()
     option()
-    print()
+    gprint()
     clear()

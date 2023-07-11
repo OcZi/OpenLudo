@@ -1,5 +1,7 @@
 import os
 
+import game_utils
+
 
 def pause():
     """
@@ -7,7 +9,7 @@ def pause():
     :return: None
     """
     print("")
-    input("Presiona ENTER para continuar.")
+    input(game_utils.gcenter("Presiona ENTER para continuar."))
     clear()
 
 
