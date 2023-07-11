@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import database
 import pdf
 
@@ -214,15 +216,40 @@ def surrender():
 
 
 def record():
+    clear()
     screen_spaces()
     gprint("- Records -")
-    gprint_list(["Top ganadores", "Ganadores (mensuales)"])
-    num = input_option(1)
+    gprint_list(["Top ganadores", "Ganadores (mensuales)", "Regresar"])
+    num = input_option(2)
+    clear()
+    screen_spaces()
+    if num == 1:
+        top_ganadores()
+    elif num == 2:
+        ganadores_mensuales()
 
 
 def top_ganadores():
-    for email, data in database.database.items():
-        print()
+    gprint("- Top jugadores -")
+    items = sorted(list(database.database.items())[:], key=lambda item: sum(item[1][3]), reverse=True)
+
+    gprint_list(items, lambda i, data: f"{i + 1}. {data[1][0]}: {data[1][3]}")
+    pause()
+
+
+def ganadores_mensuales():
+    gprint("- Ganadores mensuales -")
+    items = sorted(list(database.database.items())[:], key=lambda item: to_timestamp(item[1][1]), reverse=True)
+
+    gprint_list(items, lambda i, data: f"{i + 1} {data[1][0]}: {data[1][1]}")
+    pause()
+
+
+def to_timestamp(date: str):
+    split = date.split("/")
+    mm = split[1]
+    return datetime(2000, int(mm), 1).timestamp()
+
 
 
 def register():
