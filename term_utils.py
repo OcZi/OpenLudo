@@ -11,6 +11,7 @@ fps_delay = 0.02
 
 cursor_hidden = False
 
+
 def title(text: str):
     os.system(f"Title {text}")
 

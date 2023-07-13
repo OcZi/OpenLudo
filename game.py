@@ -80,6 +80,7 @@ def start():
         clear()
 
     """
+    como ya no necesitamos un segundo jugador, lo borramos
     while True:
         gprint("")
         gprint("   -   Tipo de juego   -")
@@ -130,6 +131,7 @@ def start():
         database.update_user()
 
     screen_spaces()
+    # muestra al ganador en un arte ascii
     gprint_art(f"{winner}")
     gprint_art("Winner!")
     pause()
@@ -229,14 +231,35 @@ def record():
 
 def top_ganadores():
     gprint("- Top jugadores -")
+    # Ordenar los jugadores por victorias
+
+    # se accede como item[x][y] porque
+    # database.items retorna una lista de tuples:
+    # {(key, value), (key, value) ...}
+    # accedemos al value con item[1]
+
+    # luego, el usuario tiene una serie de fields:
+    # 0: nombre
+    # 1: fecha
+    # 2: victorias
+    # 3: movimientos
+
+    # necesitamos ordenar por los movimientos del jugador, por lo tanto
+    # item[1][3] = movimientos del jugador
+
+    # no obstante, este es una lista y queremos cuantificarlo
+    # ordenamos por la menor cantidad de movimientos:
+    # sum(item[1][3]), reverse=True
     items = sorted(list(database.database.items())[:], key=lambda item: sum(item[1][3]), reverse=True)
 
+    # hacemos uso de lambdas. Su definición más simple sería el de una función anónima
     gprint_list(items, lambda i, data: f"{i + 1}. {data[1][0]}: {data[1][3]}")
     pause()
 
 
 def ganadores_mensuales():
     gprint("- Ganadores mensuales -")
+    # ordenamos los jugadores por la menor fecha de meses (enero, febrero, ...)
     items = sorted(list(database.database.items())[:], key=lambda item: to_timestamp(item[1][1]), reverse=True)
 
     gprint_list(items, lambda i, data: f"{i + 1} {data[1][0]}: {data[1][1]}")
@@ -244,6 +267,11 @@ def ganadores_mensuales():
 
 
 def to_timestamp(date: str):
+    # convertimos 12/2000 a milisegundos
+    # al separar 12 del 2000
+    # y solo tomamos en cuenta el mes
+    # tal y como dice el enunciado.
+    # se convierte a milisegundos con .timestamp() (tiempo total en POSIX)
     split = date.split("/")
     mm = split[0]
     return datetime(2000, int(mm), 1).timestamp()
@@ -253,6 +281,10 @@ def register():
     screen_spaces()
     gprint(" - Registrate - ")
     term_utils.switch_cursor()
+    # definimos una variable que se puede acceder luego
+    # con el walrus operator :=
+
+    # bucles para executarse hasta ser válidos
     while len(name := ginput("Nombre: ")) == 0:
         continue
     while not database.is_valid_email(email := ginput("Correo electrónico: ")):
@@ -276,9 +308,12 @@ def info():
     clear()
     screen_spaces()
     gprint("- Datos -")
+    # bucle hasta que el email sea válido
     while not database.is_valid_email(email := ginput("Correo del jugador: ")):
         continue
 
+    # si no se encuentra el user, retorna None
+    # y se ejecuta info de nuevo
     if (user := database.get_user(email)) is None:
         gprint("No se ha encontrado al usuario con dicho correo!")
         pause()
@@ -288,8 +323,11 @@ def info():
     clear()
     screen_spaces()
     gprint(f"- Información de {email} - ")
+    # muestra la lista centrada
+    # con el formato de text_for_data
     gprint_list(user, text_for_data)
     gprint()
+    # opción para convertir en pdf
     convert_pdf = ginput("Convertir a pdf? :").lower()
     if convert_pdf in ["si", "true"]:
         lines = []
@@ -316,6 +354,7 @@ def text_for_data(i, data):
 
 
 def end():
+    # cerrando el programa formalmente
     database.save()
     term_utils.close()
     exit(0)
@@ -328,7 +367,9 @@ options = [start, record, end, info]
 
 title("LUDO DIVERTIDO")
 
+# iniciamos la base de datos
 database.load()
+# iniciamos utilidades
 term_utils.init()
 
 while True:

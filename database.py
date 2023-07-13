@@ -4,7 +4,7 @@ import yaml
 
 database: dict = {}
 
-user: tuple = ()
+user: list = []
 
 email_regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
 date_regex = re.compile(r'^(0?[1-9]|1[012])[/\-]\d{4}$')
@@ -74,7 +74,7 @@ def update_user_wins():
 
 def update_user_moves(moves: list):
     global user
-    user[4] = list
+    user[4] = moves
 
 
 def is_valid_email(text):
